@@ -44,8 +44,8 @@ Before using the AI assistant, ensure the following dependencies are installed:
 
 Get your API keys from here:
 
-- OpenAI : [Get API key](https://beta.openai.com/signup/)
-- WeatherAPI : [Get API key](https://www.weatherapi.com/)
+- OpenAI : <a href="https://www.openai.com" target="_blank">Get API key</a>
+- WeatherAPI : <a href="https://www.weatherapi.com" target="_blank">Get API key</a>
 
 ## Usage
 
