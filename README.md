@@ -9,7 +9,6 @@ A Python-based AI assistant, designed to interact with users via voice commands.
 - **Weather Updates**: Fetches current weather information using WeatherAPI.
 - **Wikipedia Search**: Retrieves information from Wikipedia based on user queries.
 - **Open Websites and Applications**: Can open websites and applications with voice commands.
-- **Pip Package Installation**: Installs or uninstalls Python packages via `pip`.
 - **Time Reporting**: Provides the current time when requested.
 - **Rain Forecast**: Offers rain forecasts based on weather data.
 
@@ -23,6 +22,7 @@ Before using the AI assistant, ensure the following dependencies are installed:
 
 ### Required Libraries
 
+- `os`
 - `win32com.client` (For text-to-speech)
 - `speech_recognition` (For voice recognition)
 - `openai` (For GPT interaction)
@@ -32,6 +32,8 @@ Before using the AI assistant, ensure the following dependencies are installed:
 - `time` (For time functionality)
 - `subprocess` (For opening settings and system-related tasks)
 - `warnings` (For suppressing warnings)
+- `ast`
+- `rich`
 
 ## Setup
 
@@ -53,7 +55,6 @@ Get your API keys from here:
 - "Using Wikipedia tell me about Python programming": Fetches a Wikipedia summary of Python programming.
 - "What's the weather like today?": Provides the current weather report.
 - "Tell me the time": States the current time.
-- "Install numpy": Installs the `numpy` package.
 - "Rain forecast": Provides the forecast for rain based on current weather data.
 - "Exit": Exits the assistant.
 
