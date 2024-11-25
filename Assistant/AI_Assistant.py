@@ -153,16 +153,7 @@ def usingWikipedia(query):
         print(e.options)
 
 def install():
-    '''
-    query: hey jarvis run this command pip install/uninstall <module>
-    '''
-    command = query.split('command')[1]
-    try:
-        say('Okay sir')
-        os.system(f"{command}")
-    except Exception as e:   
-        say('Somthing went wrong')
-        print(e)
+    pass
 
 def get_weather(location):
     # The base URL for the WeatherAPI current weather endpoint
