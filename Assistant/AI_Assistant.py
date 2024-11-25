@@ -10,6 +10,7 @@ import webbrowser
 import time
 import subprocess
 import warnings
+import ast
 from files import *
 
 apikey = os.getenv('OpenaiAPI')
@@ -17,25 +18,37 @@ apikey = os.getenv('OpenaiAPI')
 def say(text):
     speak = Dispatch('SAPI.SpVoice') 
     voice = speak.GetVoices()
-    speak.Voice 
-    speak.SetVoice(voice.Item(1))
+    _ = speak.Voice 
+    try:
+        speak.SetVoice(voice.Item(1))
+    except IndexError:
+        print("Default voice being used; no alternate voice found.")
     print(f"Jarvis: {text}")
     speak.speak(text)
     
 
 def takeCommand():
     r = sr.Recognizer()
-    with sr.Microphone() as source:
-        # r.pause_threshold = 0.8
-        r.energy_threshold = 4000
-        audio = r.listen(source)
-        try:
-            print('Recognizing...')
-            query = r.recognize_google(audio, language="en-in")
-            print(f"Rohit : {query}")
-            return query
-        except:
-            return 'Sorry, can you repeat again.'
+    try:
+        with sr.Microphone() as source:
+            # r.pause_threshold = 0.8
+            r.adjust_for_ambient_noise(source=source, duration=1)
+            r.energy_threshold = 4000
+            print('Listening...')
+            audio = r.listen(source)
+        print('Recognizing...')
+        query = r.recognize_google(audio, language="en-in")
+        print(f"You : {query}")
+        return query
+    except sr.UnknownValueError as e:
+        say("Sorry, I didn't catch that. Can you repeat?")
+        return None
+    except sr.RequestError as e:
+        say("Speech recognition service is unavailable. Please try again later.")
+        return None
+    except OSError as e:
+        say("No microphone detected or it's not working. Please check your microphone.")
+        return None
 
 conversation_history = []
 
@@ -65,13 +78,17 @@ def chat():
             response = openai.completions.create(
                 model="gpt-3.5-turbo",  # Or use gpt-4 if available
                 prompt=conversation_history,
-                max_tokens=256,  # Limit the length of the response
+                max_tokens=512,  # Limit the length of the response
                 n=1,  # Number of responses to generate
                 stop=None,  # Define stopping criteria (optional)
                 temperature=0.7  # Control the creativity (0.0 = strict, 1.0 = more random)
                )
         except Exception as e:
-            say(f"Error: {str(e)}")
+            error_response = str(e)
+            error_dict_string = error_response.split(" - ", 1)[1]
+            error_dict = ast.literal_eval(error_dict_string)
+            print(f"ERROR: {error_dict['error']['message']}")
+            say("There might be a problem with your API, please recheck and try again.")
             break
         
         # Get the chatbot response
@@ -142,7 +159,7 @@ def install():
     command = query.split('command')[1]
     try:
         say('Okay sir')
-        os.system(command)
+        os.system(f"{command}")
     except Exception as e:   
         say('Somthing went wrong')
         print(e)
@@ -174,73 +191,87 @@ def get_weather(location):
 if __name__ == '__main__':
     say(greet) #type:ignore
     while True:
-        print('Listening...')
         query = takeCommand()
-        for site in sites: #type:ignore
-            if f"Open {site[0]} website".lower() in query.lower():
-                say(f"Opening {site[0]} Sir...")
-                webbrowser.open(f'{site[1]}')
-        for app in apps: #type:ignore
-            if f"open {app[0].lower()}" in query.lower():
-                say(f'Opening {app[0]} Sir... ')
-                os.startfile(f'{app[1]}')
-        if 'Open Settings'.lower() in query.lower():
-            say(f"Opening Settings Sir...")
-            subprocess.run(['explorer.exe', 'ms-settings:system'])
-        
-        if 'time' in query.lower():
-            strtime = time.strftime('%I:%M %p')   
-            if strtime.startswith('0'):
-                strtime = strtime[1:]                      
-            say(f"Sir, the time is {strtime}.")
-        
-        elif 'using AI' in query:
-            say("On it, Sir...")
-            ai(prompt_=query)
-            say(f"Response wirtten.")
-
-        elif 'Wikipedia'.lower() in query.lower():
-            usingWikipedia(query=query)
-            
-
-        elif "exit" in query.lower():
-            say('Okay Sir, exiting...')
-            break
-
-        elif "pip install" in query.lower() or 'pip uninstall' in query.lower():
-            install() 
-
-        elif "weather" in query.lower():
-            weather_data = get_weather("chandigarh")
-            if isinstance(weather_data, dict):
-                # Extract relevant data from the response
-                location_name = weather_data["location"]["name"]
-                daytimeTemp= weather_data["current"]["temp_c"]
-                nighttime_temp = weather_data["forecast"]["forecastday"][0]["day"]["mintemp_c"]
-                condition = weather_data["current"]["condition"]["text"]
-                chance_of_rain = weather_data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
-                aqi = weather_data["current"]["air_quality"]
-                print(f"Jarvis: Location is {location_name}")
-                print(f"Jarvis: Chances of rain are {chance_of_rain}%.")
-                print(f"Jarvis: Air Quality Index {aqi}.")
-                say(f"Should be {condition} today. Daytime temperature will hover around {daytimeTemp:.0f} degrees with overnight drop around {nighttime_temp:.0f}.")
-            else:
-                print(weather_data)
-
-        elif "rain" in query.lower():
-            weather_data = get_weather("chandigarh")
-            chance_of_rain = weather_data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
-            print(f"Jarvis: Chances of rain are {chance_of_rain}%.")
-            if 0 <= chance_of_rain <= 10:
-                say(f"It doesn't look like it is going to rain today.")
-            elif 10 < chance_of_rain <= 30:
-                say("There is a slight chance it will rain today.") 
-            elif  30 < chance_of_rain <= 50:
-                say("There are good chances of rain today. You should take your umbrella with you.")
-            elif 50 < chance_of_rain <= 70:
-                say("It will probabily be rain throughout the day. You must take your umbrella with you.")
-            elif 70 < chance_of_rain <= 100:
-                say("There's a certainty of rain today. Make sure you're ready for a rainy day and bring your rain gear.")
-
+        if query == None:
+            pass
         else:
-            chat()
+            for site in sites: #type:ignore
+                if f"Open {site[0]} website".lower() in query.lower():
+                    say(f"Opening {site[0]} Sir...")
+                    webbrowser.open(f'{site[1]}')
+            for app in apps: #type:ignore
+                if f"open {app[0].lower()}" in query.lower():
+                    say(f'Opening {app[0]} Sir... ')
+                    os.startfile(f'{app[1]}')
+            if 'Open Settings'.lower() in query.lower():
+                say(f"Opening Settings Sir...")
+                subprocess.run(['explorer.exe', 'ms-settings:system'])
+            
+            if 'time' in query.lower():
+                strtime = time.strftime('%I:%M %p')   
+                if strtime.startswith('0'):
+                    strtime = strtime[1:]                      
+                say(f"Sir, the time is {strtime}.")
+            
+            elif 'using AI' in query:
+                say("On it, Sir...")
+                ai(prompt_=query)
+                say(f"Response wirtten.")
+
+            elif 'Wikipedia'.lower() in query.lower():
+                usingWikipedia(query=query)
+                
+
+            elif "exit" in query.lower():
+                say('Okay Sir, exiting...')
+                break
+
+            elif "pip install" in query.lower() or 'pip uninstall' in query.lower():
+                install() 
+
+            elif "weather" in query.lower():
+                weather_data = get_weather("chandigarh")
+                if not isinstance(weather_data, dict):
+                    # Handle the error case
+                    print(f"Error: Received invalid weather data: {weather_data}")
+                    say("Sorry, I couldn't fetch the weather details. Please try again later.")
+                else:
+                    # Extract relevant data from the response
+                    try:
+                        location_name = weather_data["location"]["name"]
+                        daytime_temp = weather_data["current"]["temp_c"]
+                        nighttime_temp = weather_data["forecast"]["forecastday"][0]["day"]["mintemp_c"]
+                        condition = weather_data["current"]["condition"]["text"]
+                        chance_of_rain = weather_data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
+                        aqi = weather_data["current"]["air_quality"]
+                        # Print and speak the weather details
+                        print(f"Jarvis: Location is {location_name}")
+                        print(f"Jarvis: Chances of rain are {chance_of_rain}%.")
+                        print(f"Jarvis: Air Quality Index {aqi}.")
+                        say(f"Should be {condition} today. Daytime temperature will hover around {daytime_temp:.0f} degrees with an overnight drop to around {nighttime_temp:.0f}.")
+                    except KeyError as e:
+                        say("Sorry, I couldn't retrieve all the weather details. There might be an issue with the weather data source.")
+
+            elif "rain" in query.lower():
+                weather_data = get_weather("chandigarh")
+                if isinstance(weather_data, dict):
+                    try:
+                        chance_of_rain = weather_data["forecast"]["forecastday"][0]["day"]["daily_chance_of_rain"]
+                        print(f"Jarvis: Chances of rain are {chance_of_rain}%.")
+                        if 0 <= chance_of_rain <= 10:
+                            say(f"It doesn't look like it is going to rain today.")
+                        elif 10 < chance_of_rain <= 30:
+                            say("There is a slight chance it will rain today.") 
+                        elif  30 < chance_of_rain <= 50:
+                            say("There are good chances of rain today. You should take your umbrella with you.")
+                        elif 50 < chance_of_rain <= 70:
+                            say("It will probabily be rain throughout the day. You must take your umbrella with you.")
+                        elif 70 < chance_of_rain <= 100:
+                            say("There's a certainty of rain today. Make sure you're ready for a rainy day and bring your rain gear.")
+                    except KeyError as e:
+                            print(f"Error: Missing expected weather data key: {e}")
+                            say("Sorry, I couldn't retrieve all the weather details. There might be an issue with the weather data source.")
+                else:
+                    say("Sorry, I couldn't fetch the weather details. Please try again later.")
+            else:
+                chat()
