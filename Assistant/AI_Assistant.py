@@ -152,9 +152,6 @@ def usingWikipedia(query):
         say(f'Sir, There are multiple results for {search}. Please choose one of the following options:')
         print(e.options)
 
-def install():
-    pass
-
 def get_weather(location):
     # The base URL for the WeatherAPI current weather endpoint
     base_url = "http://api.weatherapi.com/v1/forecast.json"
@@ -162,9 +159,9 @@ def get_weather(location):
     # Define the parameters for the API request
     params = {
         "key": os.getenv('WeatherAPI'),
-        "q": location,  # Can be city name, zip code, etc.
+        "q": location,  # city name
         "days": 1, 
-        "aqi": "yes",  # Air quality index (optional), 'yes' to include AQI data
+        "aqi": "yes", 
         "alerts": "no"  # Optional: disable alerts
     }
 
@@ -216,9 +213,6 @@ if __name__ == '__main__':
             elif "exit" in query.lower():
                 say('Okay Sir, exiting...')
                 break
-
-            elif "pip install" in query.lower() or 'pip uninstall' in query.lower():
-                install() 
 
             elif "weather" in query.lower():
                 weather_data = get_weather("chandigarh")
