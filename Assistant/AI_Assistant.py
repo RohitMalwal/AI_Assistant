@@ -11,6 +11,7 @@ import time
 import subprocess
 import warnings
 import ast
+from rich import print as rprint
 from files import *
 
 apikey = os.getenv('OpenaiAPI')
@@ -23,7 +24,7 @@ def say(text):
         speak.SetVoice(voice.Item(1))
     except IndexError:
         print("Default voice being used; no alternate voice found.")
-    print(f"Jarvis: {text}")
+    rprint(f"[bold green]Jarvis[/bold green]: {text}")
     speak.speak(text)
     
 
@@ -31,14 +32,12 @@ def takeCommand():
     r = sr.Recognizer()
     try:
         with sr.Microphone() as source:
-            # r.pause_threshold = 0.8
-            r.adjust_for_ambient_noise(source=source, duration=1)
-            r.energy_threshold = 4000
             print('Listening...')
+            r.adjust_for_ambient_noise(source=source, duration=2)
             audio = r.listen(source)
         print('Recognizing...')
         query = r.recognize_google(audio, language="en-in")
-        print(f"You : {query}")
+        rprint(f"[bold green]You[/bold green] : {query}")
         return query
     except sr.UnknownValueError as e:
         say("Sorry, I didn't catch that. Can you repeat?")
@@ -52,10 +51,8 @@ def takeCommand():
 
 conversation_history = []
 
-def chat():
-    global conversation_history
+def chat(conversation_history):
     openai.api_key = apikey
-
     while True:
         # Get user input
         user_input = (f"You: {query}")
@@ -87,7 +84,7 @@ def chat():
             error_response = str(e)
             error_dict_string = error_response.split(" - ", 1)[1]
             error_dict = ast.literal_eval(error_dict_string)
-            print(f"ERROR: {error_dict['error']['message']}")
+            rprint(f"[red]ERROR: {error_dict['error']['message']}[/red]")
             say("There might be a problem with your API, please recheck and try again.")
             break
         
@@ -122,10 +119,10 @@ def ai(prompt_):
         text += response.choices[0].text.strip()
         # text += response["choices"][0]["text"]
         
-        if not os.path.exists("D:/Python/AI Assistant/Openai"):
-            os.mkdir("D:/Python/AI Assistant/Openai")
+        if not os.path.exists("Openai"):
+            os.mkdir("Openai")
         
-        with open(f"D:/Python/AI Assistant/Openai/{prompt_.split('AI')[1]}.txt", "w") as f:
+        with open(f"Openai/{prompt_.split('AI')[1]}.txt", "w") as f:
             f.write(text)
 
     except Exception as e:
@@ -259,4 +256,4 @@ if __name__ == '__main__':
                 else:
                     say("Sorry, I couldn't fetch the weather details. Please try again later.")
             else:
-                chat()
+                chat(conversation_history)
