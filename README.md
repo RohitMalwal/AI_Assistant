@@ -23,7 +23,7 @@ Before using the AI assistant, ensure the following dependencies are installed:
 ### Required Libraries
 
 - `os`
-- `win32com.client` (For text-to-speech)
+- `pywin32` (For text-to-speech)
 - `speech_recognition` (For voice recognition)
 - `openai` (For GPT interaction)
 - `wikipedia` (For Wikipedia search)
