@@ -18,7 +18,7 @@ Before using the AI assistant, ensure the following dependencies are installed:
 
 - Python 3.x
 - Required Python libraries (listed below)
-- An API key for OpenAI and WeatherAPI
+- An API key of OpenAI and WeatherAPI
 
 ### Required Libraries
 
