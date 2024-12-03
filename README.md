@@ -16,7 +16,7 @@ A Python-based AI assistant, designed to interact with users via voice commands.
 
 Before using the AI assistant, ensure the following dependencies are installed:
 
-- Python 3.x
+- Python 3.x (excluding 3.13, since `aifc` module is removed)
 - Required Python libraries (listed below)
 - An API key of OpenAI and WeatherAPI
 
