@@ -1,6 +1,6 @@
 # AI Computer Assistant
 
-A Python-based AI assistant, designed to interact with users via voice commands. It integrates with OpenAI's GPT models for conversational abilities, uses speech recognition for user input, and provides various functionalities such as Wikipedia search, weather updates, and more. It also allows the installation of Python packages via pip and provides access to a wide range of system commands.
+A Python-based AI assistant, designed to interact with users via voice commands. It integrates with OpenAI's GPT models for conversational abilities, uses speech recognition for user input, and provides various functionalities such as Wikipedia search, weather updates, and more. It also provides access to a wide range of system commands.
 
 ## Features
 
