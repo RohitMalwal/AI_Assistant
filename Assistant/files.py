@@ -31,7 +31,8 @@ apps = [
     ['File Explorer', 'shell:MyComputerFolder'],
     ['Control Panel', 'shell:ControlPanelFolder'],
     ['Microsoft Edge', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge'],
-    ['Google Chrome', 'C:/Program Files/Google/Chrome/Application/chrome']
+    ['Google Chrome', 'C:/Program Files/Google/Chrome/Application/chrome'],
+    ['Command Prompt', 'C:/Windows/system32/cmd.exe']
 ]
 
 

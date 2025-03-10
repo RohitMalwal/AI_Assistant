@@ -1,7 +1,10 @@
 ''' AI Computer Assistant '''
 
 from win32com.client import Dispatch
-import speech_recognition as sr
+# import speech_recognition as sr
+from vosk import Model, KaldiRecognizer
+import pyaudio
+import json
 import os
 import openai
 import wikipedia
@@ -26,26 +29,31 @@ def say(text):
         print("Default voice being used; no alternate voice found.")
     rprint(f"[bold green]Jarvis[/bold green]: {text}")
     speak.speak(text)
-    
 
 def takeCommand():
-    r = sr.Recognizer()
+    model = Model(r"D:\Vosk Voice english\vosk-model-en-us-0.22")  # Ensure the 'model' folder contains the Vosk model
+    recognizer = KaldiRecognizer(model, 16000)
+
+    p = pyaudio.PyAudio()
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=4000)
+    stream.start_stream()
+
     try:
-        with sr.Microphone() as source:
-            print('Listening...')
-            r.adjust_for_ambient_noise(source=source, duration=2)
-            audio = r.listen(source)
-        print('Recognizing...')
-        query = r.recognize_google(audio, language="en-in")
-        rprint(f"[bold green]You[/bold green] : {query}")
-        return query
-    except sr.UnknownValueError as e:
-        say("Sorry, I didn't catch that. Can you repeat?")
-        return None
-    except sr.RequestError as e:
-        say("Speech recognition service is unavailable. Please try again later.")
-        return None
-    except OSError as e:
+        print('Listening...')
+        while True:
+            data = stream.read(4000, exception_on_overflow=False)
+            if recognizer.AcceptWaveform(data):
+                result = json.loads(recognizer.Result())
+                query = result.get("text", "").strip()
+
+                if query:
+                    rprint(f"[bold green]You[/bold green]: {query}")
+                    return query
+                else:
+                    say("Sorry, I didn't catch that. Can you repeat?")
+                    return None
+
+    except OSError:
         say("No microphone detected or it's not working. Please check your microphone.")
         return None
 
